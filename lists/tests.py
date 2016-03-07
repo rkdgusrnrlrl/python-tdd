@@ -29,3 +29,28 @@ class HomePageTest(TestCase):
         expect_html = render_to_string('home.html', {'new_item_text' : item_text })
         self.assertEqual(response.content.decode(), expect_html)
 
+from lists.models import Item
+
+class ItemModelTest(TestCase):
+
+    def test_saveing_and_retrieving_items(self):
+        first_item = Item()
+        first_text = '첫 번째 아이템'
+        first_item.text = first_text
+        first_item.save()
+
+        second_item_item = Item()
+        second_text = '두 번째 아이템'
+        second_item_item.text = second_text
+        second_item_item.save()
+
+        saved_item = Item.objects.all()
+        self.assertEqual(saved_item.count(), 2)
+
+        first_saved_item = saved_item[0]
+        second_saved_item = saved_item[1]
+
+        self.assertEqual(first_saved_item.text, first_text)
+        self.assertEqual(second_saved_item.text, second_text)
+
+
