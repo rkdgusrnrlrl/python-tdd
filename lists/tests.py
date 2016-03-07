@@ -25,9 +25,38 @@ class HomePageTest(TestCase):
 
         response = home_page(request)
 
-        self.assertIn(item_text, response.content.decode())
-        expect_html = render_to_string('home.html', {'new_item_text' : item_text })
-        self.assertEqual(response.content.decode(), expect_html)
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, item_text)
+
+    def test_home_page_redirect_after_POST(self):
+        request = HttpRequest()
+        request.method = 'POST'
+        item_text = "신규 작업 아이템"
+        request.POST['item_text'] = item_text
+
+        response = home_page(request)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], '/')
+
+    def test_home_page_only_saves_items_when_necessary(self):
+        request = HttpRequest()
+        home_page(request)
+        self.assertEqual(Item.objects.count(), 0)
+
+    def test_home_page_displays_all_Items(self):
+        todo01 = '작업01'
+        Item.objects.create(text=todo01)
+        todo02 = '작업02'
+        Item.objects.create(text=todo02)
+
+        request = HttpRequest()
+        response = home_page(request)
+
+        self.assertIn(todo01, response.content.decode())
+        self.assertIn(todo02, response.content.decode())
+
 
 from lists.models import Item
 
