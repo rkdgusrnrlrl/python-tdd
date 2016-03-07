@@ -25,14 +25,29 @@ class Functional_Test(TestCase):
         self.assertEqual(inputbox.get_attribute('placeholder'), '작업아이템입력')
 
         #공작깃털 사기라고 텍스트 박스에 입력한다
-        inputbox.send_keys("공작깃털 사기")
 
-        inputbox.send_keys(Keys.ENTER)
+        todo01 = "공작깃털 사기"
+        self.add_todo(inputbox, todo01)
 
+        todo01_result = '1 : 공작깃털 사기'
+        self.check_for_row_in_list_table(todo01_result)
+
+        # 2번째 할일 등록 작업
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        todo02 = '공작깃털을 이용해서 그물 만들기'
+        self.add_todo(inputbox, todo02)
+
+        todo02_result = '2 : 공작깃털을 이용해서 그물 만들기'
+        self.check_for_row_in_list_table(todo01_result)
+        self.check_for_row_in_list_table(todo02_result)
+
+
+    def check_for_row_in_list_table(self, todo01_result):
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
-        self.assertTrue(any(row.text == '1 : 공작깃털 사기' for row in rows),)
+        self.assertIn(todo01_result, [row.text for row in rows])
 
-
-
+    def add_todo(self, inputbox, todo01):
+        inputbox.send_keys(todo01)
+        inputbox.send_keys(Keys.ENTER)
 
