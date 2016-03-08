@@ -18,8 +18,8 @@ class NewVistorTest(LiveServerTestCase):
         self.browser.get(self.live_server_url)
         self.assertIn('To-Do' , self.browser.title)
 
-        head_text = self.browser.find_element_by_tag_name('h1').text
-        self.assertIn('To-Do', head_text)
+        #head_text = self.browser.find_element_by_tag_name('h1').text
+        #self.assertIn('To-Do', head_text)
 
         #그녀는 바로 작업을 추가한다
         inputbox = self.browser.find_element_by_id('id_new_item')
@@ -57,11 +57,13 @@ class NewVistorTest(LiveServerTestCase):
 
         #프란시스가 새로운 작업 아이템을 입력하기 시작한다.
         #그는 에디스보다 재미가 없다.
-        self.add_todo('우유 사기')
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        todo01 = '우유 사기'
+        self.add_todo(inputbox, todo01)
 
         #프란시스가 전용 URL 을 취득한다.
         francis_list_url = self.browser.current_url
-        self.assertRegex(francis_list_url, '/list/.+')
+        self.assertRegex(francis_list_url, '/lists/.+')
         self.assertNotEqual(francis_list_url, edith_list_url)
 
         #에디스가 입력한 흔적없다는 것을 다시 확인한다.

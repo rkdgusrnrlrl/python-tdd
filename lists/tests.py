@@ -38,24 +38,13 @@ class HomePageTest(TestCase):
         response = home_page(request)
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/')
+        self.assertEqual(response['location'], '/lists/the-only-list-in-the-world')
 
     def test_home_page_only_saves_items_when_necessary(self):
         request = HttpRequest()
         home_page(request)
         self.assertEqual(Item.objects.count(), 0)
 
-    def test_home_page_displays_all_Items(self):
-        todo01 = '작업01'
-        Item.objects.create(text=todo01)
-        todo02 = '작업02'
-        Item.objects.create(text=todo02)
-
-        request = HttpRequest()
-        response = home_page(request)
-
-        self.assertIn(todo01, response.content.decode())
-        self.assertIn(todo02, response.content.decode())
 
 
 from lists.models import Item
@@ -83,3 +72,16 @@ class ItemModelTest(TestCase):
         self.assertEqual(second_saved_item.text, second_text)
 
 
+class ListViewTest(TestCase):
+     def test_displays_all_Items(self):
+         Item.objects.create(text="itemey 1")
+         Item.objects.create(text="itemey 2")
+
+         response = self.client.get('/lists/the-only-list-in-the-world/')
+
+         self.assertContains(response, 'itemey 1')
+         self.assertContains(response, 'itemey 2')
+
+     def test_uses_list_template(self):
+         response = self.client.get('/lists/the-only-list-in-the-world/')
+         self.assertTemplateUsed(response, 'list.html')
