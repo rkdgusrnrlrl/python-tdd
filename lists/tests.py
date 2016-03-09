@@ -17,20 +17,29 @@ class HomePageTest(TestCase):
         #content 는 바이트 문자열임으로 decode를 통해 파이썬 유니코드문자열로 변환
         self.assertEqual(response.content.decode(), expect_html)
 
-from lists.models import Item
+from lists.models import Item, List
 
-class ItemModelTest(TestCase):
+
+class ListAndItemModelTest(TestCase):
 
     def test_saveing_and_retrieving_items(self):
+        list_ = List()
+        list_.save()
+
         first_item = Item()
         first_text = '첫 번째 아이템'
         first_item.text = first_text
+        first_item.list = list_
         first_item.save()
 
-        second_item_item = Item()
+        second_item = Item()
         second_text = '두 번째 아이템'
-        second_item_item.text = second_text
-        second_item_item.save()
+        second_item.text = second_text
+        second_item.list = list_
+        second_item.save()
+
+        saved_list = List.objects.first()
+        self.assertEqual(saved_list, list_);
 
         saved_item = Item.objects.all()
         self.assertEqual(saved_item.count(), 2)
@@ -39,13 +48,17 @@ class ItemModelTest(TestCase):
         second_saved_item = saved_item[1]
 
         self.assertEqual(first_saved_item.text, first_text)
+        self.assertEqual(first_saved_item.list, list_)
         self.assertEqual(second_saved_item.text, second_text)
+        self.assertEqual(second_saved_item.list, list_)
 
 
 class ListViewTest(TestCase):
      def test_displays_all_Items(self):
-         Item.objects.create(text="itemey 1")
-         Item.objects.create(text="itemey 2")
+         list_ = List.objects.create()
+
+         Item.objects.create(text="itemey 1", list=list_)
+         Item.objects.create(text="itemey 2", list=list_)
 
          response = self.client.get('/lists/the-only-list-in-the-world/')
 
