@@ -17,36 +17,6 @@ class HomePageTest(TestCase):
         #content 는 바이트 문자열임으로 decode를 통해 파이썬 유니코드문자열로 변환
         self.assertEqual(response.content.decode(), expect_html)
 
-    def test_home_page_can_save_a_POST_request(self):
-        request = HttpRequest()
-        request.method = 'POST'
-        item_text = "신규 작업 아이템"
-        request.POST['item_text'] = item_text
-
-        response = home_page(request)
-
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertEqual(new_item.text, item_text)
-
-    def test_home_page_redirect_after_POST(self):
-        request = HttpRequest()
-        request.method = 'POST'
-        item_text = "신규 작업 아이템"
-        request.POST['item_text'] = item_text
-
-        response = home_page(request)
-
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/lists/the-only-list-in-the-world')
-
-    def test_home_page_only_saves_items_when_necessary(self):
-        request = HttpRequest()
-        home_page(request)
-        self.assertEqual(Item.objects.count(), 0)
-
-
-
 from lists.models import Item
 
 class ItemModelTest(TestCase):
@@ -85,3 +55,20 @@ class ListViewTest(TestCase):
      def test_uses_list_template(self):
          response = self.client.get('/lists/the-only-list-in-the-world/')
          self.assertTemplateUsed(response, 'list.html')
+
+class NewListTest(TestCase):
+    def test_home_page_can_save_a_POST_request(self):
+        item_text = '신규 작업 아이템'
+        self.client.post('/lists/new', data={'item_text' : ('%s' % item_text)})
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+
+        self.assertEqual(new_item.text, item_text)
+
+    def test_home_page_redirect_after_POST(self):
+        item_text = '신규 작업 아이템'
+        response = self.client.post('/lists/new', data={'item_text' : ('%s' % item_text)})
+
+        self.assertEqual(response.status_code, 302)
+
+        self.assertRedirects(response, '/lists/the-only-list-in-the-world', target_status_code=301)

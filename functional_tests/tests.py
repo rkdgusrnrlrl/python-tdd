@@ -72,13 +72,6 @@ class NewVistorTest(LiveServerTestCase):
         self.assertNotIn(todo02, page_text)
 
 
-
-
-
-
-
-
-
     def check_for_row_in_list_table(self, todo01_result):
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
