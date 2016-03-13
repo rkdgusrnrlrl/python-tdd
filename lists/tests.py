@@ -54,19 +54,20 @@ class ListAndItemModelTest(TestCase):
 
 
 class ListViewTest(TestCase):
-     def test_displays_all_Items(self):
+     def test_displays_only_items_for_that_list(self):
          list_ = List.objects.create()
 
          Item.objects.create(text="itemey 1", list=list_)
          Item.objects.create(text="itemey 2", list=list_)
 
-         response = self.client.get('/lists/the-only-list-in-the-world/')
+         response = self.client.get('/lists/%d/' % (list_.id))
 
          self.assertContains(response, 'itemey 1')
          self.assertContains(response, 'itemey 2')
 
      def test_uses_list_template(self):
-         response = self.client.get('/lists/the-only-list-in-the-world/')
+         list_ = List.objects.create()
+         response = self.client.get('/lists/%d/' % (list_.id))
          self.assertTemplateUsed(response, 'list.html')
 
 class NewListTest(TestCase):
@@ -81,7 +82,13 @@ class NewListTest(TestCase):
     def test_home_page_redirect_after_POST(self):
         item_text = '신규 작업 아이템'
         response = self.client.post('/lists/new', data={'item_text' : ('%s' % item_text)})
-
+        list_ = List.objects.first()
         self.assertEqual(response.status_code, 302)
 
-        self.assertRedirects(response, '/lists/the-only-list-in-the-world', target_status_code=301)
+        self.assertRedirects(response, '/lists/%d/' % (list_.id))
+
+class NewItemTest(TestCase):
+    def test_can_save_a_POST_request_to_an_existing_list(self):
+        other_list = List.objects.create()
+        List.objects.create()
+
