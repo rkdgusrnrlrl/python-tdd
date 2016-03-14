@@ -58,8 +58,8 @@ class NewVistorTest(LiveServerTestCase):
         #프란시스가 새로운 작업 아이템을 입력하기 시작한다.
         #그는 에디스보다 재미가 없다.
         inputbox = self.browser.find_element_by_id('id_new_item')
-        todo01 = '우유 사기'
-        self.add_todo(inputbox, todo01)
+        todo = '우유 사기'
+        self.add_todo(inputbox, todo)
 
         #프란시스가 전용 URL 을 취득한다.
         francis_list_url = self.browser.current_url
