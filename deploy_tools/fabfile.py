@@ -5,9 +5,7 @@ import random
 REPO_URL = 'https://github.com/rkdgusrnrlrl/python-tdd.git'
 
 
-def _create_directory_structure_if_necessary(site_folder):
-    for subfolder in ('database', 'static', 'virtualenv', 'source'):
-        run('mkdir -p %s%s' % (site_folder, subfolder))
+
 
 
 def _get_lastest_source(site_folder):
@@ -16,7 +14,7 @@ def _get_lastest_source(site_folder):
     else:
         run('git clone %s %s' % (REPO_URL, site_folder))
 
-    # local 로컬 장비에서 실행 subprocess.Popen 을 렙핑됨
+
     current_commit = local("git log -n 1 --format=%H", capture=True)
     run('cd %s && git reset --hard %s ' % (site_folder, current_commit))
 
@@ -35,21 +33,25 @@ def _update_settings(source_folder):
 
 def _update_virtualenv(source_folder):
     virtual_folder = source_folder + '/../virtualenv'
+    if not exists(virtual_folder):
+        run('mkdir -p %s ' % (virtual_folder))
+
     if not exists(virtual_folder + '/bin/pip'):
-        run('virtualenv --python==python3.4 %s' % (virtual_folder,))
-    run('%s/bin/pip install -r %s requirement.txt' % (virtual_folder, source_folder))
+        run('virtualenv --python=python3 %s' % (virtual_folder,))
+    run('%s/bin/pip install -r %s/requirements.txt' % (virtual_folder, source_folder))
 
 
 def _update_static_file(source_folder):
     run('cd %s && ../virtualenv/bin/python manage.py collectstatic --noinput' % (source_folder))
 
 def _update_database(source_folder):
+    if not exists(source_folder+"/../database"):
+        run('cd %s/.. && mkdir -p database' % (source_folder))
     run('cd %s && ../virtualenv/bin/python manage.py migrate --noinput' % (source_folder))
 
 def deploy():
     site_folder = '/home/%s/docker/py_tdd' % env.user
     source_folder = site_folder + '/source'
-    _create_directory_structure_if_necessary(site_folder)
     _get_lastest_source(site_folder)
     _update_virtualenv(source_folder)
     _update_static_file(source_folder)
