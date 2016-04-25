@@ -1,31 +1,9 @@
-import sys
-from django.test import LiveServerTestCase
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+
 from selenium import webdriver
-from unittest import TestCase
-
-from selenium.webdriver.common.keys import Keys
+from functional_tests.base import FunctionalTest
 
 
-class NewVistorTest(StaticLiveServerTestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        for arg in sys.argv:
-            if 'liveserver' in arg:
-                cls.server_url = 'http://' + arg.split('=')[1]
-                return
-        super().setUpClass()
-        cls.server_url = cls.live_server_url
-
-    def setUp(self):
-        self.browser = webdriver.Firefox()
-        #암묵적인 대기
-        self.browser.implicitly_wait(3)
-
-    def tearDown(self):
-        self.browser.refresh()
-        self.browser.quit()
+class NewVistorTest(FunctionalTest):
 
     def test_enter_website(self):
         self.browser.get(self.server_url)
@@ -85,32 +63,3 @@ class NewVistorTest(StaticLiveServerTestCase):
         self.assertNotIn(todo02, page_text)
 
 
-    def check_for_row_in_list_table(self, todo01_result):
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn(todo01_result, [row.text for row in rows])
-
-    def add_todo(self, inputbox, todo01):
-        inputbox.send_keys(todo01)
-        inputbox.send_keys(Keys.ENTER)
-
-    def test_layout_and_styling(self):
-        #에디스는 메인 페이지를 방문한다.
-        self.browser.get(self.server_url)
-        self.browser.set_window_size(1024,768)
-
-        #그녀는 입력 상사가 가운데 배치 된것을 본다.
-        inputbox = self.browser.find_element_by_id('id_new_item')
-        self.assertAlmostEqual(
-            inputbox.location['x'] + inputbox.size['width'] / 2,
-            512,
-            delta=10
-        )
-
-        inputbox.send_keys('testing\n')
-        inputbox = self.browser.find_element_by_id('id_new_item')
-        self.assertAlmostEqual(
-            inputbox.location['x'] + inputbox.size['width'] / 2,
-            512,
-            delta=10
-        )
